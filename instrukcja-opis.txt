@@ -1,0 +1,14 @@
+Opis dzia³ania Pac-Mana: 
+-Pod prawym przyciskiem myszy menu kontekstowe, wszystkie skróty klawiszowe, opisane, klikalne
+-Pod przyciskiem scrolla zaznaczanie pojedynczych p³ytek na mapie po prawej
+-pod lewym przyciskiem myszy wklejanie na mapê po prawej wybranego sprite'a
+-przycisk drag - jego klikniêcie powoduje ¿e mo¿na przeci¹gaæ po mapie wybranym spritem i nim "rysowaæ", to samo mo¿na wtedy robiæ z zaznaczeniem przyciskiem scrolla
+-po przytrzymaniu ctrl mo¿na zaznaczyæ obszar, niestety niezbyt to u mnie dzia³a
+-eksport mapy skrótem klawiszowym b¹dŸ pod prawym przyciskiem myszy w menu kontekstowym, do eksportu mapy wykorzysta³em bibliotekê do zapisu Blob'ów 
+-import mapy tak¿e w menu kontekstowym
+
+w samym Pac-Manie jest tak¿e instrukcja pod logo
+
+Na przegl¹darce chrome z jakiegoœ powodu zapisuje plik mapy mez rozszerzenia, ale pliki te dzia³aj¹, wiêc mo¿na je importowaæ i te¿ zadzia³aj¹ normalnie. Mam dosyæ dziwne skalowanie u siebie w domu na komputerze, jak zauwa¿y³em po przejœciu z tym pacmanem na laptopa jest trochê za du¿y na zwyk³y monitor 1080p, wiêc mo¿liwe ¿e trzeba bêdzie go ju¿ w przegl¹drce zmniejszyæ do 50%, próbowa³em to obejœæ ale rozwala mi wtedy marginy wiêc zostawi³em tak.
+
+pozdrawiam, Patryk ¯ak

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ManPacer</title>
+    <link href="https://fonts.googleapis.com/css?family=Monoton&display=swap" rel="stylesheet">
+    <script src="FileSaver.js"></script>
+    <style>
+        html {
+            font-family: 'Monoton';
+            text-transform: uppercase;
+            transform-origin: 0 0;
+            background-color: black;
+            color: whitesmoke;
+            font-size: 2px;
+        }
+
+        .tile {
+            -webkit-box-shadow: inset 0px 0px 0px 1px #ba70ff;
+            -moz-box-shadow: inset 0px 0px 0px 1px #ba70ff;
+            box-shadow: inset 0px 0px 0px 1px #ba70ff;
+
+        }
+
+        #Thebox {
+            overflow: hidden;
+            width: 3820px;
+            height: 1820px;
+            border: 1px solid blueviolet;
+        }
+
+        #box {
+            top: 490px;
+
+            position: absolute;
+        }
+
+        #mapbox {
+            position: absolute;
+            left: 1580px;
+        }
+
+
+        .button {
+            float: left;
+            background-color: blueviolet;
+            text-align: center;
+            position: relative;
+            font-size: 28px;
+            border: 1px solid whitesmoke;
+            margin-right: 18.5px;
+
+        }
+
+        #openFile {
+            background-color: blueviolet;
+            text-align: center;
+            position: relative;
+            font-size: 28px;
+            border: 1px solid whitesmoke;
+        }
+
+        #hud {
+            padding: 10px;
+            position: absolute;
+            font-size: 28px;
+
+
+        }
+
+
+
+        #keycombs {
+            width: 600px;
+            height: 665px;
+            background-color: whitesmoke;
+            z-index: 100;
+            color: blueviolet;
+            border: 1px solid whitesmoke;
+            position: absolute;
+            display: none;
+        }
+
+        .keycomb {
+            height: 80px;
+            width: 100%;
+            position: relative;
+            font-size: 50px;
+            border-bottom: 1px solid blueviolet;
+            color: blueviolet;
+            text-align: center;
+
+        }
+
+
+        .sprite {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="keycombs">
+        <div onclick="deleteMarked()" class="keycomb">Ctrl + x → Delete</div>
+        <div onclick="copyMarked()" class="keycomb">Ctrl + c → Copy</div>
+        <div onclick="fillMarked()" class="keycomb">Ctrl + v → Paste</div>
+        <div onclick="markAll()" class="keycomb">Ctrl + a → Mark all</div>
+        <div class="keycomb">Ctrl + z → Undo</div>
+        <div onclick="saveMap()" class="keycomb">Ctrl + s → Save map</div>
+        <div class="keycomb" style="height: 180px;">Load map<input type="file" id="openFile" /></div>
+
+    </div>
+    <div id="Thebox">
+        <div id="box" style="height: 960px; width: 1536px">
+
+        </div>
+        <div id="hud" style="height: 465px; width: 1536px">
+            <div><a href="pacmanFinalAsOfNow.html"><img src="Logo2.png" id="logo" style="width: 1536px"></a></div>
+            <div id="dragbtn" class="button" style="height: 150px; width: 150px">
+                <p>Drag off</p>
+            </div>
+            <div class="button"
+                style="height: 150px; width: 252px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">
+                <p><u>⬅ Drag on</u><br>draw with the selected tile</p>
+            </div>
+            <div class="button"
+                style="height: 150px; width: 252px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">
+                <p><u>Left MB</u><br>use selected tile</p>
+            </div>
+            <div class="button"
+                style="height: 150px; width: 252px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">
+                <p><u>Middle MB</u><br>mark single tiles</p>
+            </div>
+            <div class="button"
+                style="height: 150px; width: 252px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">
+                <p><u>Right MB</u><br><br>context menu</p>
+            </div>
+            <div class="button"
+                style="height: 150px; width: 252px; font-family: Arial, Helvetica, sans-serif; font-weight: 700;">
+                <p><u>ctrl + Left MB</u><br><br>mark area</p>
+            </div>
+        </div>
+
+        <div id="mapbox" style="height: 1440px; width: 1440px">
+
+        </div>
+    </div>
+    <script>
+        var Thebox = document.getElementById("Thebox")
+        var keycombs = document.getElementById("keycombs")
+        document.addEventListener('contextmenu', function (eveve) {
+            eveve.preventDefault();
+            let y = eveve.clientY
+            let x = eveve.clientX
+            keycombs.style.left = x + "px"
+            keycombs.style.top = y + "px"
+            keycombs.style.display = "block"
+
+        }, false);
+
+        //funkcje
+        var dragToggle = false;
+
+        function copyMarked() {
+            coppied = markedTiles
+
+        }
+
+        function clickMouseover() {
+            console.log("clickMouseover")
+            ctx = this.getContext("2d")
+            ctx.drawImage(img, currentPicked.ssx * 48, currentPicked.ssy * 48, 48,
+                48, 0, 0, 48, 48)
+            this.ix = currentPicked.ssx
+            this.iy = currentPicked.ssy
+            console.log(maparr)
+
+        }
+
+        function deleteMarked() {
+            for (let i = 0; i < markedTiles.length; i++) {
+                var conx = markedTiles[i].getContext("2d")
+                conx.clearRect(0, 0, markedTiles[i].width, markedTiles[i].height);
+            }
+        }
+
+        function fillMarked() {
+            for (let i = 0; i < markedTiles.length; i++) {
+                var conx = markedTiles[i].getContext("2d")
+                conx.drawImage(img, currentPicked.ssx * 48, currentPicked.ssy * 48, 48, 48, 0, 0, 48, 48)
+                this.ix = currentPicked.ssx
+                this.iy = currentPicked.ssy
+            }
+        }
+
+        function markAll() {
+            console.log("marked all")
+            for (var q = 0; q < 30; q++) {
+                for (var w = 0; w < 30; w++) {
+                    maparr[q][w].picked = true
+                    maparr[q][w].style.opacity = "0.5"
+                    currentPickedmap = maparr[q][w]
+
+                    markedTiles.push(currentPickedmap)
+
+                }
+            }
+
+        }
+
+
+        function markMap() {
+            this.picked = true
+            this.style.opacity = "0.5"
+            currentPickedmap = this
+            console.log(markedTiles)
+
+            markedTiles.push(currentPickedmap)
+
+        }
+
+        function dragSprite() {
+            if (dragToggle == true) {
+                dragToggle = false
+                btnDrag.innerHTML = "<p>Drag off</p>"
+
+            } else {
+                dragToggle = true
+                btnDrag.innerHTML = "<p>Drag on</p>"
+            }
+        }
+
+        function saveMap() {
+            var fileMap = []
+            var ifzero = false
+            maparr = maparr.flat()
+            for (var q = 0; q < maparr.length; q++) {
+                if (maparr[q].ix != undefined && maparr[q].iy != undefined) {
+                    fileEl = [maparr[q].ix, maparr[q].iy]
+                    if (ifzero == false) {
+                        fileMap.push(fileEl)
+                        ifzero = true
+                    } else {
+                        fileMap.push(" " + fileEl)
+                    }
+
+                } else {
+                    fileEl = ["undefined", "undefined"]
+                    if (ifzero == false) {
+                        fileMap.push(fileEl)
+                        ifzero = true
+                    } else {
+                        fileMap.push(" " + fileEl)
+                    }
+                }
+
+            }
+
+            var blob = new Blob([fileMap], {
+                type: "text/plain;charset=utf-8"
+            });
+            saveAs(blob, "zmap.txt");
+
+            ifzero = false
+        }
+
+        var filler = new Image();
+        filler.src = "filler.png"
+
+        document.getElementById("openFile").addEventListener("change", function () {
+            var fr = new FileReader()
+            fr.onload = function () {
+                var loadArr = this.result
+                loadArr = loadArr.split(", ")
+                maparr = maparr.flat()
+                for (var x = 0; x < loadArr.length; x++) {
+                    loadArr[x] = loadArr[x].split(",")
+                    loadX = parseInt(loadArr[x][0])
+                    loadY = parseInt(loadArr[x][1])
+                    var cont = maparr[x].getContext("2d")
+                    cont.drawImage(filler, 0, 0, 48, 48);
+                    cont.drawImage(img, loadX * 48, loadY * 48, 48, 48, 0, 0, 48,
+                        48)
+                    if (isNaN(loadX)) {
+                        console.log("skipped")
+                    } else {
+                        maparr[x].ix = loadX
+                        maparr[x].iy = loadY
+                    }
+
+                }
+                console.log(loadArr)
+            }
+            fr.readAsText(this.files[0])
+        })
+
+        //funkcjeend
+
+        var sprites = document.getElementById("sprites")
+
+        //sprajtszit
+        var box = document.getElementById("box")
+        var divTile
+        var arr = []
+        var currentPicked = 0
+        var currentPickedmap = 0
+        class spriteTile {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.init();
+            }
+            init() {
+                divTile = document.createElement("canvas")
+                divTile.width = 48;
+                divTile.height = 48;
+                let sumid = this.x + "." + this.y
+                divTile.setAttribute("id", sumid)
+                var ctx = divTile.getContext("2d")
+                divTile.setAttribute("class", "sprite")
+                ctx.drawImage(img, this.x * 48, this.y * 48, 48, 48, 0, 0, 48, 48);
+                divTile.picked = false
+                divTile.ssx = this.x
+                divTile.ssy = this.y
+                divTile.addEventListener("click", this.onclick);
+            }
+            onclick() {
+
+                if (currentPicked != 0) {
+                    currentPicked.picked = false
+                    currentPicked.style.opacity = "1"
+                }
+                this.picked = true
+                this.style.opacity = "0.5"
+                currentPicked = this
+
+
+            }
+        }
+
+        var img = new Image();
+        img.src = "sprites.png"
+        img.onload = function () {
+
+            for (let y = 0; y < 20; y++) {
+                arr[y] = []
+                for (let x = 0; x < 32; x++) {
+                    new spriteTile(x, y)
+                    box.appendChild(divTile)
+                    arr[y][x] = divTile
+
+                }
+
+            }
+            //sprajtszitend
+
+
+        }
+        //mapa
+        var mapbox = document.getElementById("mapbox")
+        var mapTile
+        var maparr = []
+        let mo1 = false
+        let mo3 = false
+
+
+        document.onmousedown = function (e) {
+            if (e.which === 2) {
+                mo3 = true
+            } else if (e.which === 1) {
+                mo1 = true
+            }
+
+        }
+        document.onmouseup = function (e) {
+            if (e.which === 2) {
+                mo3 = false
+            } else if (e.which === 1) {
+                mo1 = false
+            }
+
+
+        }
+        document.onclick = function () {
+            keycombs.style.display = "none"
+        }
+
+        var markedTiles = []
+        class spriteTilemap {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.init();
+            }
+            init() {
+                mapTile = document.createElement("canvas")
+                mapTile.width = 48;
+                mapTile.height = 48;
+                let sumid = this.x + "." + this.y
+                mapTile.setAttribute("id", "map" + sumid)
+                var ctx = mapTile.getContext("2d")
+                mapTile.setAttribute("class", "tile")
+
+                mapTile.picked = false
+                mapTile.onmousedown = function (e) {
+                    if (e.which === 2) {
+                        e.preventDefault();
+                        markMap.bind(this)();
+                        console.log("marked")
+                    }
+                } //markMap na jeden klik ppm
+                mapTile.addEventListener("click", clickMouseover); //clickMouseover na jeden klik lpm
+                Thebox.addEventListener("click", this.unMark); //czyszczenie zaznaczeń
+                mapTile.addEventListener("mouseover",
+                    function () { //przesuwanie ppm albo lpm na clickMouseover albo markMap
+                        if (mo3 == true) {
+                            markMap.bind(this)();
+                            console.log("RMB " + mo3 + "|" + "LMB " + mo1)
+                        }
+                        if (dragToggle == true) {
+                            if (mo1 == true) {
+                                clickMouseover.bind(this)();
+                                console.log("RMB " + mo3 + "|" + "LMB " + mo1)
+                            }
+
+                        }
+
+                    });
+            }
+
+            unMark() {
+                if (markedTiles.length > 0) {
+                    for (let i = 0; i < markedTiles.length; i++) {
+                        markedTiles[i].picked = false
+                        markedTiles[i].style.opacity = "1"
+                    }
+                    markedTiles = []
+                }
+            }
+
+
+
+        }
+
+
+        for (let y = 0; y < 30; y++) {
+            maparr[y] = []
+            for (let x = 0; x < 30; x++) {
+                new spriteTilemap(x, y)
+                mapbox.appendChild(mapTile)
+                maparr[y][x] = mapTile
+
+            }
+
+        }
+        //mapaend
+
+        //buttony
+
+        var btnDrag = document.getElementById("dragbtn")
+        btnDrag.onclick = dragSprite
+
+        //buttonyend
+
+        //marek
+
+        let ctrl = false
+        document.body.onkeydown = function (e) {
+            var eee
+            if (navigator.userAgent.includes("Macintosh")) {
+                eee = e.metaKey
+            } else {
+                eee = e.ctrlKey
+            }
+            mapbox.onmousedown = function (eve) {
+                let y = eve.clientY
+                let x = eve.clientX
+                console.log("left: " + x + ", top: " + y)
+                var marek = document.createElement("div")
+                marek.id = "marek"
+                marek.style.position = "absolute"
+                marek.style.top = y + "px"
+                marek.style.left = x + "px"
+                marek.style.backgroundColor = "white"
+                marek.style.opacity = "30%"
+                document.body.appendChild(marek)
+                mapbox.onmousemove = function (ev) {
+                    if (ctrl == true) {
+
+                        var w = ev.clientX - x
+                        var h = ev.clientY - y
+                        if (w < 0 && h < 0) {
+                            marek.style.width = x - ev.clientX + "px"
+                            marek.style.left = ev.clientX + "px"
+                            marek.style.top = ev.clientY + "px"
+                            marek.style.height = y - ev.clientY + "px"
+                        } else if (w < 0) {
+                            marek.style.width = x - ev.clientX + "px"
+                            marek.style.left = ev.clientX + "px"
+                            marek.style.height = h + "px"
+                        } else if (h < 0) {
+                            marek.style.width = ev.clientX - x + "px"
+                            marek.style.top = ev.clientY + "px"
+                            marek.style.height = y - ev.clientY + "px"
+                        } else {
+                            marek.style.width = w + "px"
+                            marek.style.height = h + "px"
+                        }
+                    }
+                    document.body.onmouseup = function () {
+                        if (document.body.contains(marek)) {
+                            document.body.removeChild(marek)
+                        }
+
+                    }
+                    document.addEventListener('keyup', function (event) {
+                        if (event.keyCode == "16" && document.body.contains(marek)) {
+                            document.body.removeChild(marek)
+                        }
+
+                    });
+
+
+
+                }
+
+
+
+            }
+
+            if (eee) {
+                ctrl = true
+            }
+            window.onkeyup = () => {
+                ctrl = false
+            }
+        }
+
+        //marekend
+
+        //skróty
+        var coppied = []
+        document.addEventListener('keydown', function (event) {
+            var eee
+            if (navigator.userAgent.includes("Macintosh")) {
+                eee = event.metaKey
+            } else {
+                eee = event.ctrlKey
+            }
+            if (eee && event.key === 'v') {
+                fillMarked()
+            } else if (eee && event.key === "c") {
+                copyMarked()
+
+            } else if (eee && event.key === "x") {
+                deleteMarked()
+            } else if (eee && event.key === "a") {
+                event.preventDefault()
+                markAll()
+
+            } else if (eee && event.key === "s") {
+                event.preventDefault()
+                saveMap()
+            }
+
+        });
+
+        //skrótyend
+        console.log(arr)
+        console.log(maparr)
+    </script>
+
+</body>
+
+</html>
